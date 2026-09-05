@@ -30,12 +30,25 @@ void printIpAddress(const IpAddress& address) {
 		<< static_cast<unsigned int>(address[3]) << '\n';
 }
 
-template<typename Predicate>
-void printFiltered(const IpPool& ipPool, Predicate predicate) {
-	for (const auto& address : ipPool) {
-		if (predicate(address)) {
-			printIpAddress(address);
+template<typename... Octets>
+void printFiltered(const IpPool& ipPool, Octets... octets) {
+	const std::array<int, sizeof...(Octets)> filter{octets...};
+	
+	int matchGroup = 0;
+	for (const auto& addres : ipPool) {
+		int match = 1;
+		for (size_t i = 0; i < filter.size(); ++i) {
+			if (addres[i] != filter[i]) {
+				match = 0;
+				break;
+			}
 		}
+
+		if (match) {
+			matchGroup = 1;
+			printIpAddress(addres);
+		}
+		else if (matchGroup) break;
 	}
 }
 
@@ -47,12 +60,14 @@ int main() {
 			ipPool.push_back(parseIpAddress(line));
 		}
 
-		std::sort(ipPool.begin(), ipPool.end(), std::greater<>{});
+		//std::sort(ipPool.begin(), ipPool.end(), std::greater<>{});
 
-		printFiltered(ipPool, [](const IpAddress&) {return true;});
-		printFiltered(ipPool, [](const IpAddress& address) {return address[0] == 1;});
-		printFiltered(ipPool, [](const IpAddress& address) {return address[0] == 46 && address[1] == 70;});
-		printFiltered(ipPool, [](const IpAddress& address) {return std::find(address.begin(), address.end(), 46) != address.end();});
+		printFiltered(ipPool, 1);
+		printFiltered(ipPool, 46, 70);
+		// printFiltered(ipPool, [](const IpAddress&) {return true;});
+		// printFiltered(ipPool, [](const IpAddress& address) {return address[0] == 1;});
+		// printFiltered(ipPool, [](const IpAddress& address) {return address[0] == 46 && address[1] == 70;});
+		// printFiltered(ipPool, [](const IpAddress& address) {return std::find(address.begin(), address.end(), 46) != address.end();});
 	} 
 	catch (const std::exception& error) {
 		std::cerr << error.what() << std::endl;
