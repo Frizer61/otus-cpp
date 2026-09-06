@@ -1,0 +1,22 @@
+PROJECT_NAME           = "print_ip"
+PROJECT_NUMBER         = "0.0.1"
+PROJECT_BRIEF          = "Printing an arbitrary IP address using SFINAE"
+
+OUTPUT_DIRECTORY       = docs
+INPUT                  = print_ip.h main.cpp
+FILE_PATTERNS          = *.h *.cpp
+RECURSIVE              = NO
+
+EXTRACT_ALL            = YES
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = YES
+
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+GENERATE_LATEX         = NO
+
+HAVE_DOT               = YES
+DOT_IMAGE_FORMAT       = svg
+
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = NO
