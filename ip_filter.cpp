@@ -33,22 +33,23 @@ void printIpAddress(const IpAddress& address) {
 template<typename... Octets>
 void printFiltered(const IpPool& ipPool, Octets... octets) {
 	const std::array<int, sizeof...(Octets)> filter{octets...};
-	
-	int matchGroup = 0;
-	for (const auto& addres : ipPool) {
-		int match = 1;
-		for (size_t i = 0; i < filter.size(); ++i) {
-			if (addres[i] != filter[i]) {
-				match = 0;
-				break;
-			}
-		}
 
-		if (match) {
-			matchGroup = 1;
-			printIpAddress(addres);
-		}
-		else if (matchGroup) break;
+	IpAddress maxAddress;
+	maxAddress.fill(255);
+
+	IpAddress minAddress;
+	minAddress.fill(0);
+
+	for (std::size_t i = 0; i < filter.size(); ++i) {
+		maxAddress[i] = filter[i];
+		minAddress[i] = filter[i];
+	}
+
+	const auto first = std::lower_bound(ipPool.begin(), ipPool.end(), maxAddress, std::greater<>{});
+	const auto last = std::upper_bound(first, ipPool.end(), minAddress, std::greater<>{});
+
+	for (auto iterator = first; iterator != last; ++iterator) {
+		printIpAddress(*iterator);
 	}
 }
 
@@ -60,7 +61,7 @@ int main() {
 			ipPool.push_back(parseIpAddress(line));
 		}
 
-		//std::sort(ipPool.begin(), ipPool.end(), std::greater<>{});
+		std::sort(ipPool.begin(), ipPool.end(), std::greater<>{});
 
 		printFiltered(ipPool, 1);
 		printFiltered(ipPool, 46, 70);
