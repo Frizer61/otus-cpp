@@ -27,10 +27,9 @@ int main(int argc, char** argv) {
 
 		ConsoleLogger console;
 		FileLogger file;
-		BulkParser parser(static_cast<std::size_t>(size), [&](const Bulk& bulk) {
-			console.write(bulk);
-			file.write(bulk);
-		});
+		BulkParser parser(static_cast<std::size_t>(size));
+		parser.addLogger(console);
+		parser.addLogger(file);
 
 		std::string command;
 		while (std::getline(std::cin, command)) {

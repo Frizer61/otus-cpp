@@ -1,19 +1,19 @@
 #pragma once
 
+#include "ILogger.h"
+
 #include <cstddef>
-#include <ctime>
-#include <functional>
 #include <string>
 #include <vector>
 
 struct Bulk {
 	std::vector<std::string> commands;
-	std::time_t time = 0;
 };
 
 class BulkParser {
 public:
-	BulkParser(std::size_t size, std::function<void(const Bulk&)> handler);
+	explicit BulkParser(std::size_t size);
+	void addLogger(ILogger& logger);
 	void process(const std::string& command);
 	void finish();
 
@@ -23,5 +23,6 @@ private:
 	std::size_t size_;
 	std::size_t depth_ = 0;
 	Bulk bulk_;
-	std::function<void(const Bulk&)> handler_;
+	// Логгеры должны существовать всё время работы парсера.
+	std::vector<ILogger*> loggers_;
 };

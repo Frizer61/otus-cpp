@@ -1,13 +1,16 @@
 #include "bulk.h"
 
 #include <stdexcept>
-#include <utility>
 
-BulkParser::BulkParser(std::size_t size, std::function<void(const Bulk&)> handler)
-	: size_(size), handler_(std::move(handler)) {
+BulkParser::BulkParser(std::size_t size)
+	: size_(size) {
 	if (size_ == 0) {
 		throw std::invalid_argument("Bulk size must be positive");
 	}
+}
+
+void BulkParser::addLogger(ILogger& logger) {
+	loggers_.push_back(&logger);
 }
 
 void BulkParser::process(const std::string& command) {
@@ -30,7 +33,9 @@ void BulkParser::process(const std::string& command) {
 	}
 
 	if (bulk_.commands.empty()) {
-		bulk_.time = std::time(nullptr);
+		for (auto logger : loggers_) {
+			logger->onBulkStart();
+		}
 	}
 	bulk_.commands.push_back(command);
 	if (depth_ == 0 && bulk_.commands.size() == size_) {
@@ -51,6 +56,8 @@ void BulkParser::flush() {
 	if (bulk_.commands.empty()) {
 		return;
 	}
-	handler_(bulk_);
+	for (auto logger : loggers_) {
+		logger->write(bulk_);
+	}
 	bulk_.commands.clear();
 }

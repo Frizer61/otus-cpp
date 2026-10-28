@@ -1,5 +1,7 @@
 #include "logger.h"
 
+#include "bulk.h"
+
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -20,13 +22,17 @@ void writeBulk(std::ostream& output, const Bulk& bulk) {
 
 }
 
-void ConsoleLogger::write(const Bulk& bulk) const {
+void ConsoleLogger::write(const Bulk& bulk) {
 	writeBulk(std::cout, bulk);
 	std::cout.flush();
 }
 
-void FileLogger::write(const Bulk& bulk) const {
-	std::string base = "bulk" + std::to_string(bulk.time);
+void FileLogger::onBulkStart() {
+	time_ = std::time(nullptr);
+}
+
+void FileLogger::write(const Bulk& bulk) {
+	std::string base = "bulk" + std::to_string(time_);
 	std::string filename = base + ".log";
 	int number = 1;
 	// Несколько пакетов могут начаться в одну секунду.
